@@ -1,0 +1,17 @@
+{
+  "name": "soundnodeserver",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "zed31rus_",
+  "type": "module",
+  "main": "App.js",
+  "scripts": {
+    "dev": "node App.js"
+  },
+  "dependencies": {
+    "cookie": "^1.0.2",
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  }
+}
