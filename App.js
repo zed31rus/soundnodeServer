@@ -20,7 +20,7 @@ nodesSocket.on("connection", (node) => {
         if (authRes.ok && data?.user?.login) {
             node.user = data.user;
             nodes.set(node.user.login, { socket: node, user: node.user });
-            clientsSocket.emit("nodesChanged", Array.from(nodes.keys()));
+            clientsSocket.emit("nodesChanged", Array.from(nodes.values()).map(nodeItem => nodeItem.user));
 
             console.log(`user ${node.user.login} authenticated`);
             console.log("active nodes:", Array.from(nodes.keys()));
@@ -39,7 +39,7 @@ nodesSocket.on("connection", (node) => {
     node.on("disconnect", () => {
         if (node.user?.login) {
         nodes.delete(node.user.login);
-        clientsSocket.emit("nodesChanged", Array.from(nodes.keys()));
+        clientsSocket.emit("nodesChanged", Array.from(nodes.values()).map(nodeItem => nodeItem.user));
         console.log(`user ${node.user.login} disconnected`);
         } else {
         console.log(`unauthenticated node disconnected`);
@@ -85,7 +85,8 @@ clientsSocket.on("connection", (client) => {
   console.log("client connected:", client.id);
   clients.add(client);
 
-  client.emit("nodesChanged", Array.from(nodes.keys()));
+    console.log(Array.from(nodes.values()).map(nodeItem => nodeItem.user))
+  clientsSocket.emit("nodesChanged", Array.from(nodes.values()).map(nodeItem => nodeItem.user));
 
   client.on("disconnect", () => {
     clients.delete(client);
@@ -96,20 +97,28 @@ clientsSocket.on("connection", (client) => {
     const login = clientReq.login;
     const node = nodes.get(login);
 
-    if (!node) return clientRes({ ok: false, message: `Node ${login} not found.` });
+    if (!node) return clientRes({ ok: false, message: `Node ${login} not found.`, data: null  });
 
     client.join(`${login}'s room`);
     client.nodeConnected = node;
-    clientRes({ ok: true, message: `Connected to node ${login}`, user: node.user });
+    clientRes({ ok: true, message: `Connected to node ${login}`, data: {user: node.user} });
 
     console.log(`client connected to node ${login}`);
   });
+
+  client.on("initStates", async (clientReq, clientRes) => {
+    const nodeSocket = client.nodeConnected?.socket;
+    if (!nodeSocket) return clientRes({ ok: false, message: "Not connected to a Soundpad Node.", data: null  });
+    nodeSocket.emit("initStates", null, (nodeRes) => {
+      clientRes({ ok: true, message: `${nodeRes.message}`, data: null });
+    })
+  })
 /*--------------------------------------------------------------------------------------------------------------------------------------------
                                                         soundpad clients events
 -------------------------------------------------------------------------------------------------------------------------------------------- */
   client.on("play", (clientReq, clientRes) => {
     const nodeSocket = client.nodeConnected?.socket;
-    if (!nodeSocket) return clientRes({ ok: false, message: "Not connected to a Soundpad Node." });
+    if (!nodeSocket) return clientRes({ ok: false, message: "Not connected to a Soundpad Node.", data: null  });
 
     nodeSocket.emit("play", clientReq, (nodeRes) => clientRes(nodeRes));
     console.log(`sent play to ${client.nodeConnected?.user?.login}`);
@@ -117,16 +126,41 @@ clientsSocket.on("connection", (client) => {
 
   client.on("stop", (clientReq, clientRes) => {
     const nodeSocket = client.nodeConnected?.socket;
-    if (!nodeSocket) return clientRes({ ok: false, message: "Not connected to a Soundpad Node." });
+    if (!nodeSocket) return clientRes({ ok: false, message: "Not connected to a Soundpad Node.", data: null });
 
-    nodeSocket.emit("stop", clientReq.soundIndex, (nodeRes) => clientRes(nodeRes));
+    nodeSocket.emit("stop", null, (nodeRes) => clientRes(nodeRes));
     console.log(`sent stop to ${client.nodeConnected?.user?.login}`);
+  });
+
+  client.on("togglePause", (clientReq, clientRes) => {
+    const nodeSocket = client.nodeConnected?.socket;
+    if (!nodeSocket) return clientRes({ ok: false, message: "Not connected to a Soundpad Node.", data: null  });
+
+    nodeSocket.emit("togglePause", null, (nodeRes) => clientRes(nodeRes));
+    console.log(`sent togglePause to ${client.nodeConnected?.user?.login}`);
+  });
+
+  client.on("jump", (clientReq, clientRes) => {
+    const nodeSocket = client.nodeConnected?.socket;
+    if (!nodeSocket) return clientRes({ ok: false, message: "Not connected to a Soundpad Node.", data: null  });
+
+    nodeSocket.emit("jump", clientReq, (nodeRes) => clientRes(nodeRes));
+    console.log(`sent jump to ${client.nodeConnected?.user?.login}`);
+  });
+
+  client.on("setVolume", (clientReq, clientRes) => {
+    const nodeSocket = client.nodeConnected?.socket;
+    if (!nodeSocket) return clientRes({ ok: false, message: "Not connected to a Soundpad Node.", data: null  });
+
+    nodeSocket.emit("setVolume", clientReq, (nodeRes) => clientRes(nodeRes));
+    console.log(`sent setVolume to ${client.nodeConnected?.user?.login}`);
   });
 
   client.on("getSoundListJSON", (clientReq, clientRes) => {
     const nodeSocket = client.nodeConnected?.socket;
-    if (!nodeSocket) return clientRes({ ok: false, message: "Not connected to a Soundpad Node." });
+    if (!nodeSocket) return clientRes({ ok: false, message: "Not connected to a Soundpad Node.", data: null  });
 
     nodeSocket.emit("getSoundListJSON", null, (nodeRes) => clientRes(nodeRes));
+    console.log(`sent getSoundListJSON to ${client.nodeConnected?.user?.login}`);
   });
 });
