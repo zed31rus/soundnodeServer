@@ -163,4 +163,9 @@ clientsSocket.on("connection", (client) => {
     nodeSocket.emit("getSoundListJSON", null, (nodeRes) => clientRes(nodeRes));
     console.log(`sent getSoundListJSON to ${client.nodeConnected?.user?.login}`);
   });
+
+  client.on("addFavourite", (clientReq, clientRes) => {
+    
+  })
 });
+
