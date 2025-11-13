@@ -1,4 +1,4 @@
-Личный API проект построенный на базе **Express** с открытым исходным кодом.
+Личный API проект построенный на базе **socket.io** с открытым исходным кодом.
 Автор: **zed31rus**  
 
 🌐 Доступен на доменах: [nodes.zed31rus.ru](https://nodes.zed31rus.ru), [clients.zed31rus.ru](https://clients.zed31rus.ru)
