@@ -23,5 +23,6 @@
 
 ```bash
 git clone https://github.com/zed31rus/soundnodeserver.git
-cd Autorisation
+cd soundnodeserver
 npm install
+```
