@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 
 const nodesSocket = new Server(3005, { cors: { origin: "*", credentials: true } });
-const nodes = new Map();
+const nodes = new Set();
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------
                                                         technical nodes events
@@ -17,12 +17,12 @@ nodesSocket.on("connection", (node) => {
         const data = await authRes.json();
         console.log("authRes:", data);
 
-        if (authRes.ok && data?.user?.login) {
-            node.user = data.user;
-            nodes.set(node.user.login, { socket: node, user: node.user });
-            clientsSocket.emit("nodesChanged", Array.from(nodes.values()).map(nodeItem => nodeItem.user));
+        if (authRes.ok && data?.user.login) {
+            node.user = data.user.login;
+            nodes.add(node.user)
+            clientsSocket.emit("nodesChanged", nodes);
 
-            console.log(`user ${node.user.login} authenticated`);
+            console.log(`user ${node.user} authenticated`);
             console.log("active nodes:", Array.from(nodes.keys()));
 
             res?.({ ok: true, user: node.user });
@@ -37,15 +37,14 @@ nodesSocket.on("connection", (node) => {
     });
 
     node.on("disconnect", () => {
-        if (node.user?.login) {
-        nodes.delete(node.user.login);
-        clientsSocket.emit("nodesChanged", Array.from(nodes.values()).map(nodeItem => nodeItem.user));
-        console.log(`user ${node.user.login} disconnected`);
+        if (node.user) {
+        nodes.delete(node.user);
+        clientsSocket.emit("nodesChanged", nodes);
+        console.log(`user ${node.user} disconnected`);
         } else {
         console.log(`unauthenticated node disconnected`);
         }
     });
-
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------
                                                         soundpad nodes events
@@ -168,4 +167,3 @@ clientsSocket.on("connection", (client) => {
     
   })
 });
-
