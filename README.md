@@ -2,7 +2,7 @@
 Автор: **zed31rus**  
 
 🌐 Доступен на доменах: [nodes.zed31rus.ru](https://nodes.zed31rus.ru), [clients.zed31rus.ru](https://clients.zed31rus.ru)
-✉️ Почта для связи: [oleg@zed31rus.ru](mailto:oleg@zed31rus.ru)  
+✉️ Почта для связи: [contact@zed31rus.ru](mailto:contact@zed31rus.ru)  
 
 > Проект хостится на личном ПК, поэтому сайт доступен, когда компьютер включен.  
 
